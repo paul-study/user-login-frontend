@@ -11,6 +11,7 @@ const BankingDashboard = ({ user, onLogout }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loadingAccounts, setLoadingAccounts] = useState(true);
+  const [creatingAccount, setCreatingAccount] = useState(false);
 
   // Fetch all accounts on component mount
   useEffect(() => {
@@ -130,6 +131,41 @@ const BankingDashboard = ({ user, onLogout }) => {
     onLogout();
   };
 
+  const handleCreateAccount = async () => {
+    setCreatingAccount(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/accounts/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          account_type: 'Savings', // Default account type
+          initial_balance: 0.00
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccess(`New account created successfully! Account #${data.account_number}`);
+        // Refresh accounts list
+        fetchAllAccounts();
+      } else {
+        setError(data.message || 'Failed to create new account');
+      }
+    } catch (error) {
+      setError('Failed to create new account. Please try again.');
+    } finally {
+      setCreatingAccount(false);
+    }
+  };
+
   if (loadingAccounts) {
     return (
       <div className="dashboard">
@@ -150,6 +186,10 @@ const BankingDashboard = ({ user, onLogout }) => {
       </div>
       
       <div className="dashboard-content">
+        {/* Global Error and Success Messages */}
+        {error && <div className="error-message global-message">{error}</div>}
+        {success && <div className="success-message global-message">{success}</div>}
+        
         {/* User Information */}
         <div className="user-info">
           <h3>Your Profile</h3>
@@ -157,6 +197,16 @@ const BankingDashboard = ({ user, onLogout }) => {
           <p><strong>Username:</strong> {user.username}</p>
           <p><strong>Full Name:</strong> {user.name || user.full_name}</p>
           <p><strong>Email:</strong> {user.email}</p>
+          
+          <div className="profile-actions">
+            <button 
+              className="create-account-button"
+              onClick={handleCreateAccount}
+              disabled={creatingAccount}
+            >
+              {creatingAccount ? 'Creating Account...' : '+ Add New Account'}
+            </button>
+          </div>
         </div>
 
         {/* Account Selection */}
@@ -209,9 +259,6 @@ const BankingDashboard = ({ user, onLogout }) => {
             {/* Transaction Section */}
             <div className="transaction-section">
               <h3>Make a Transaction</h3>
-              
-              {error && <div className="error-message">{error}</div>}
-              {success && <div className="success-message">{success}</div>}
               
               <div className="transaction-form">
                 <div className="selected-account-info">
