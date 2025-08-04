@@ -5,7 +5,7 @@ import BankingDashboard from './components/BankingDashboard';
 import './App.css';
 
 function App() {
-  const [currentView, setCurrentView] = useState('login'); // 'login', 'register', 'dashboard'
+  const [currentView, setCurrentView] = useState('login');
   const [user, setUser] = useState(null);
 
   const handleLogin = (userData) => {

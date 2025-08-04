@@ -145,7 +145,7 @@ const BankingDashboard = ({ user, onLogout }) => {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          account_type: 'Savings', // Default account type
+          account_type: 'Savings',
           initial_balance: 0.00
         })
       });
